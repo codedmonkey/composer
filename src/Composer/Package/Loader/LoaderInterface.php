@@ -14,6 +14,7 @@ namespace Composer\Package\Loader;
 
 use Composer\Package\CompletePackage;
 use Composer\Package\CompleteAliasPackage;
+use Composer\Package\JsonPackage;
 use Composer\Package\RootAliasPackage;
 use Composer\Package\RootPackage;
 use Composer\Package\BasePackage;
@@ -35,5 +36,5 @@ interface LoaderInterface
      *
      * @phpstan-param class-string<CompletePackage|RootPackage> $class
      */
-    public function load(array $config, string $class = 'Composer\Package\CompletePackage'): BasePackage;
+    public function load(JsonPackage $config, string $class = 'Composer\Package\CompletePackage'): BasePackage;
 }
