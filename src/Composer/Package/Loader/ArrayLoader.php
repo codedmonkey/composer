@@ -15,6 +15,7 @@ namespace Composer\Package\Loader;
 use Composer\Package\BasePackage;
 use Composer\Package\CompleteAliasPackage;
 use Composer\Package\CompletePackage;
+use Composer\Package\JsonPackage;
 use Composer\Package\RootPackage;
 use Composer\Package\PackageInterface;
 use Composer\Package\CompletePackageInterface;
@@ -22,6 +23,7 @@ use Composer\Package\Link;
 use Composer\Package\RootAliasPackage;
 use Composer\Package\Version\VersionParser;
 use Composer\Pcre\Preg;
+use Symfony\Component\JsonStreamer\JsonStreamReader;
 
 /**
  * @author Konstantin Kudryashiv <ever.zet@gmail.com>
@@ -46,7 +48,7 @@ class ArrayLoader implements LoaderInterface
     /**
      * @inheritDoc
      */
-    public function load(array $config, string $class = 'Composer\Package\CompletePackage'): BasePackage
+    public function load(JsonPackage $config, string $class = 'Composer\Package\CompletePackage'): BasePackage
     {
         if ($class !== 'Composer\Package\CompletePackage' && $class !== 'Composer\Package\RootPackage') {
             trigger_error('The $class arg is deprecated, please reach out to Composer maintainers ASAP if you still need this.', E_USER_DEPRECATED);
@@ -106,31 +108,31 @@ class ArrayLoader implements LoaderInterface
      *
      * @phpstan-param class-string<PackageClass> $class
      */
-    private function createObject(array $config, string $class): CompletePackage
+    private function createObject(JsonPackage $config, string $class): CompletePackage
     {
-        if (!isset($config['name'])) {
+        if ($config->name === null) {
             throw new \UnexpectedValueException('Unknown package has no name defined ('.json_encode($config).').');
         }
-        if (!isset($config['version']) || !is_scalar($config['version'])) {
-            throw new \UnexpectedValueException('Package '.$config['name'].' has no version defined.');
+        if (!isset($config->version) || !is_scalar($config->version)) {
+            throw new \UnexpectedValueException('Package '.$config->name.' has no version defined.');
         }
-        if (!is_string($config['version'])) {
-            $config['version'] = (string) $config['version'];
+        if (!is_string($config->version)) {
+            $config->version = (string) $config->version;
         }
 
         // handle already normalized versions
-        if (isset($config['version_normalized']) && is_string($config['version_normalized'])) {
-            $version = $config['version_normalized'];
+        if (isset($config->versionNormalized) && is_string($config->versionNormalized)) {
+            $version = $config->versionNormalized;
 
             // handling of existing repos which need to remain composer v1 compatible, in case the version_normalized contained VersionParser::DEFAULT_BRANCH_ALIAS, we renormalize it
             if ($version === VersionParser::DEFAULT_BRANCH_ALIAS) {
-                $version = $this->versionParser->normalize($config['version']);
+                $version = $this->versionParser->normalize($config->version);
             }
         } else {
-            $version = $this->versionParser->normalize($config['version']);
+            $version = $this->versionParser->normalize($config->version);
         }
 
-        return new $class($config['name'], $version, $config['version']);
+        return new $class($config->name, $version, $config->version);
     }
 
     /**
@@ -177,7 +179,7 @@ class ArrayLoader implements LoaderInterface
             if (!isset($config['source']['type'], $config['source']['url'], $config['source']['reference'])) {
                 throw new \UnexpectedValueException(sprintf(
                     "Package %s's source key should be specified as {\"type\": ..., \"url\": ..., \"reference\": ...},\n%s given.",
-                    $config['name'],
+                    $config->name,
                     json_encode($config['source'])
                 ));
             }
@@ -194,7 +196,7 @@ class ArrayLoader implements LoaderInterface
                 throw new \UnexpectedValueException(sprintf(
                     "Package %s's dist key should be specified as ".
                     "{\"type\": ..., \"url\": ..., \"reference\": ..., \"shasum\": ...},\n%s given.",
-                    $config['name'],
+                    $config->name,
                     json_encode($config['dist'])
                 ));
             }
@@ -409,14 +411,14 @@ class ArrayLoader implements LoaderInterface
      */
     public function getBranchAlias(array $config): ?string
     {
-        if (!isset($config['version']) || !is_scalar($config['version'])) {
+        if (!isset($config->version) || !is_scalar($config->version)) {
             throw new \UnexpectedValueException('no/invalid version defined');
         }
-        if (!is_string($config['version'])) {
-            $config['version'] = (string) $config['version'];
+        if (!is_string($config->version)) {
+            $config->version = (string) $config->version;
         }
 
-        if (strpos($config['version'], 'dev-') !== 0 && '-dev' !== substr($config['version'], -4)) {
+        if (strpos($config->version, 'dev-') !== 0 && '-dev' !== substr($config->version, -4)) {
             return null;
         }
 
@@ -440,7 +442,7 @@ class ArrayLoader implements LoaderInterface
                 }
 
                 // ensure that it is the current branch aliasing itself
-                if (strtolower($config['version']) !== strtolower($sourceBranch)) {
+                if (strtolower($config->version) !== strtolower($sourceBranch)) {
                     continue;
                 }
 
@@ -459,7 +461,7 @@ class ArrayLoader implements LoaderInterface
         if (
             isset($config['default-branch'])
             && $config['default-branch'] === true
-            && false === $this->versionParser->parseNumericAliasPrefix(Preg::replace('{^v}', '', $config['version']))
+            && false === $this->versionParser->parseNumericAliasPrefix(Preg::replace('{^v}', '', $config->version))
         ) {
             return VersionParser::DEFAULT_BRANCH_ALIAS;
         }

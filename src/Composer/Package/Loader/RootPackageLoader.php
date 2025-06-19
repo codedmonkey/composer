@@ -15,6 +15,7 @@ namespace Composer\Package\Loader;
 use Composer\Package\BasePackage;
 use Composer\Config;
 use Composer\IO\IOInterface;
+use Composer\Package\JsonPackage;
 use Composer\Package\RootAliasPackage;
 use Composer\Pcre\Preg;
 use Composer\Repository\RepositoryFactory;
@@ -76,53 +77,53 @@ class RootPackageLoader extends ArrayLoader
      *
      * @phpstan-param class-string<RootPackage> $class
      */
-    public function load(array $config, string $class = 'Composer\Package\RootPackage', ?string $cwd = null): BasePackage
+    public function load(JsonPackage $config, string $class = 'Composer\Package\RootPackage', ?string $cwd = null): BasePackage
     {
         if ($class !== 'Composer\Package\RootPackage') {
             trigger_error('The $class arg is deprecated, please reach out to Composer maintainers ASAP if you still need this.', E_USER_DEPRECATED);
         }
 
-        if (!isset($config['name'])) {
-            $config['name'] = '__root__';
-        } elseif ($err = ValidatingArrayLoader::hasPackageNamingError($config['name'])) {
+        if ($config->name === null) {
+            $config->name = '__root__';
+        } elseif ($err = ValidatingArrayLoader::hasPackageNamingError($config->name)) {
             throw new \RuntimeException('Your package name '.$err);
         }
         $autoVersioned = false;
-        if (!isset($config['version'])) {
+        if (!isset($config->version)) {
             $commit = null;
 
             // override with env var if available
             if (Platform::getEnv('COMPOSER_ROOT_VERSION')) {
-                $config['version'] = $this->versionGuesser->getRootVersionFromEnv();
+                $config->version = $this->versionGuesser->getRootVersionFromEnv();
             } else {
                 $versionData = $this->versionGuesser->guessVersion($config, $cwd ?? Platform::getCwd(true));
                 if ($versionData) {
-                    $config['version'] = $versionData['pretty_version'];
-                    $config['version_normalized'] = $versionData['version'];
+                    $config->version = $versionData['pretty_version'];
+                    $config->versionNormalized = $versionData['version'];
                     $commit = $versionData['commit'];
                 }
             }
 
-            if (!isset($config['version'])) {
-                if ($this->io !== null && $config['name'] !== '__root__' && 'project' !== ($config['type'] ?? '')) {
+            if (!isset($config->version)) {
+                if ($this->io !== null && $config->name !== '__root__' && 'project' !== ($config['type'] ?? '')) {
                     $this->io->warning(
                         sprintf(
                             "Composer could not detect the root package (%s) version, defaulting to '1.0.0'. See https://getcomposer.org/root-version",
-                            $config['name']
+                            $config->name
                         )
                     );
                 }
-                $config['version'] = '1.0.0';
+                $config->version = '1.0.0';
                 $autoVersioned = true;
             }
 
             if ($commit) {
-                $config['source'] = [
+                $config->source = [
                     'type' => '',
                     'url' => '',
                     'reference' => $commit,
                 ];
-                $config['dist'] = [
+                $config->dist = [
                     'type' => '',
                     'url' => '',
                     'reference' => $commit,
@@ -165,9 +166,9 @@ class RootPackageLoader extends ArrayLoader
                 $stabilityFlags = self::extractStabilityFlags($links, $realPackage->getMinimumStability(), $stabilityFlags);
                 $references = self::extractReferences($links, $references);
 
-                if (isset($links[$config['name']])) {
+                if (isset($links[$config->name])) {
                     throw new \RuntimeException(sprintf('Root package \'%s\' cannot require itself in its composer.json' . PHP_EOL .
-                                'Did you accidentally name your root package after an external package?', $config['name']));
+                                'Did you accidentally name your root package after an external package?', $config->name));
                 }
             }
         }

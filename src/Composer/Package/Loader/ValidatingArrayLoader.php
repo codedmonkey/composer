@@ -13,6 +13,7 @@
 namespace Composer\Package\Loader;
 
 use Composer\Package\BasePackage;
+use Composer\Package\JsonPackage;
 use Composer\Pcre\Preg;
 use Composer\Semver\Constraint\Constraint;
 use Composer\Package\Version\VersionParser;
@@ -60,7 +61,7 @@ class ValidatingArrayLoader implements LoaderInterface
     /**
      * @inheritDoc
      */
-    public function load(array $config, string $class = 'Composer\Package\CompletePackage'): BasePackage
+    public function load(JsonPackage $config, string $class = 'Composer\Package\CompletePackage'): BasePackage
     {
         $this->errors = [];
         $this->warnings = [];

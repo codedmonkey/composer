@@ -14,6 +14,7 @@ namespace Composer\Package\Version;
 
 use Composer\Config;
 use Composer\IO\IOInterface;
+use Composer\Package\JsonPackage;
 use Composer\Pcre\Preg;
 use Composer\Repository\Vcs\HgDriver;
 use Composer\IO\NullIO;
@@ -70,7 +71,7 @@ class VersionGuesser
      *
      * @phpstan-return Version|null
      */
-    public function guessVersion(array $packageConfig, string $path): ?array
+    public function guessVersion(JsonPackage $packageConfig, string $path): ?array
     {
         if (!function_exists('proc_open')) {
             return null;
@@ -132,7 +133,7 @@ class VersionGuesser
      *
      * @return array{version: string|null, commit: string|null, pretty_version: string|null, feature_version?: string|null, feature_pretty_version?: string|null}
      */
-    private function guessGitVersion(array $packageConfig, string $path): array
+    private function guessGitVersion(JsonPackage $packageConfig, string $path): array
     {
         GitUtil::cleanEnv();
         $commit = null;
@@ -356,11 +357,11 @@ class VersionGuesser
     /**
      * @param array<string, mixed> $packageConfig
      */
-    private function isFeatureBranch(array $packageConfig, ?string $branchName): bool
+    private function isFeatureBranch(JsonPackage $packageConfig, ?string $branchName): bool
     {
         $nonFeatureBranches = '';
-        if (!empty($packageConfig['non-feature-branches'])) {
-            $nonFeatureBranches = implode('|', $packageConfig['non-feature-branches']);
+        if (!empty($packageConfig->nonFeatureBranches)) {
+            $nonFeatureBranches = implode('|', $packageConfig->nonFeatureBranches);
         }
 
         return !Preg::isMatch('{^(' . $nonFeatureBranches . '|master|main|latest|next|current|support|tip|trunk|default|develop|\d+\..+)$}', $branchName, $match);

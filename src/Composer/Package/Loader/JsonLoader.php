@@ -38,6 +38,7 @@ class JsonLoader
      */
     public function load($json): BasePackage
     {
+        var_dump($json);die;
         if ($json instanceof JsonFile) {
             $config = $json->read();
         } elseif (file_exists($json)) {
