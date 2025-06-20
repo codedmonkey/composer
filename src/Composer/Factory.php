@@ -13,6 +13,7 @@
 namespace Composer;
 
 use Composer\Config\JsonConfigSource;
+use Composer\Json\ComposerJsonFile;
 use Composer\Json\JsonFile;
 use Composer\IO\IOInterface;
 use Composer\Package\Archiver;
@@ -296,7 +297,7 @@ class Factory
         if (is_string($localConfig)) {
             $composerFile = $localConfig;
 
-            $file = new JsonFile($localConfig, null, $io);
+            $file = new ComposerJsonFile($localConfig, null, $io);
 
             if (!$file->exists()) {
                 if ($localConfig === './composer.json' || $localConfig === 'composer.json') {
@@ -325,7 +326,7 @@ class Factory
         // Load config and override with local config/auth config
         $config = static::createConfig($io, $cwd);
         $isGlobal = $localConfigSource !== Config::SOURCE_UNKNOWN && realpath($config->get('home')) === realpath(dirname($localConfigSource));
-        $config->merge($localConfig, $localConfigSource);
+        $config->merge($localConfig->toArray(), $localConfigSource);
 
         if (isset($composerFile)) {
             $io->writeError('Loading config file ' . $composerFile .' ('.realpath($composerFile).')', true, IOInterface::DEBUG);

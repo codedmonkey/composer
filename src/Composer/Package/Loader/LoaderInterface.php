@@ -14,6 +14,7 @@ namespace Composer\Package\Loader;
 
 use Composer\Package\CompletePackage;
 use Composer\Package\CompleteAliasPackage;
+use Composer\Package\JsonPackage;
 use Composer\Package\RootAliasPackage;
 use Composer\Package\RootPackage;
 use Composer\Package\BasePackage;
@@ -28,12 +29,12 @@ interface LoaderInterface
     /**
      * Converts a package from an array to a real instance
      *
-     * @param  mixed[] $config package data
-     * @param  string  $class  FQCN to be instantiated
+     * @param  JsonPackage|mixed[] $config package data
+     * @param  string              $class  FQCN to be instantiated
      *
      * @return CompletePackage|CompleteAliasPackage|RootPackage|RootAliasPackage
      *
      * @phpstan-param class-string<CompletePackage|RootPackage> $class
      */
-    public function load(array $config, string $class = 'Composer\Package\CompletePackage'): BasePackage;
+    public function load($config, string $class = 'Composer\Package\CompletePackage'): BasePackage;
 }
