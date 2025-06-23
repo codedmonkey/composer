@@ -13,6 +13,7 @@
 namespace Composer\Command;
 
 use Composer\DependencyResolver\Request;
+use Composer\Json\ComposerJsonFile;
 use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackageInterface;
 use Composer\Package\Loader\RootPackageLoader;
@@ -155,7 +156,7 @@ EOT
             file_put_contents($this->file, "{\n}\n");
         }
 
-        $this->json = new JsonFile($this->file);
+        $this->json = new ComposerJsonFile($this->file);
         $this->lock = Factory::getLockFile($this->file);
         $this->composerBackup = file_get_contents($this->json->getPath());
         $this->lockBackup = file_exists($this->lock) ? file_get_contents($this->lock) : null;
@@ -318,8 +319,8 @@ EOT
 
         $this->firstRequire = $this->newlyCreated;
         if (!$this->firstRequire) {
-            $composerDefinition = $this->json->read();
-            if (count($composerDefinition['require'] ?? []) === 0 && count($composerDefinition['require-dev'] ?? []) === 0) {
+            $config = $this->json->read();
+            if (count($config->require ?? []) === 0 && count($config->requireDev ?? []) === 0) {
                 $this->firstRequire = true;
             }
         }
@@ -382,16 +383,16 @@ EOT
      */
     private function getPackagesByRequireKey(): array
     {
-        $composerDefinition = $this->json->read();
+        $config = $this->json->read();
         $require = [];
         $requireDev = [];
 
-        if (isset($composerDefinition['require'])) {
-            $require = $composerDefinition['require'];
+        if (isset($config->require)) {
+            $require = $config->require;
         }
 
-        if (isset($composerDefinition['require-dev'])) {
-            $requireDev = $composerDefinition['require-dev'];
+        if (isset($config->requireDev)) {
+            $requireDev = $config->requireDev;
         }
 
         return array_merge(
@@ -572,27 +573,27 @@ EOT
     /**
      * @param array<string, string> $new
      */
-    private function updateFile(JsonFile $json, array $new, string $requireKey, string $removeKey, bool $sortPackages): void
+    private function updateFile(ComposerJsonFile $json, array $new, string $requireKey, string $removeKey, bool $sortPackages): void
     {
         if ($this->updateFileCleanly($json, $new, $requireKey, $removeKey, $sortPackages)) {
             return;
         }
 
-        $composerDefinition = $this->json->read();
+        $config = $this->json->read();
         foreach ($new as $package => $version) {
-            $composerDefinition[$requireKey][$package] = $version;
-            unset($composerDefinition[$removeKey][$package]);
-            if (isset($composerDefinition[$removeKey]) && count($composerDefinition[$removeKey]) === 0) {
-                unset($composerDefinition[$removeKey]);
+            $config[$requireKey][$package] = $version;
+            unset($config[$removeKey][$package]);
+            if (isset($config[$removeKey]) && count($config[$removeKey]) === 0) {
+                unset($config[$removeKey]);
             }
         }
-        $this->json->write($composerDefinition);
+        $this->json->write($config);
     }
 
     /**
      * @param array<string, string> $new
      */
-    private function updateFileCleanly(JsonFile $json, array $new, string $requireKey, string $removeKey, bool $sortPackages): bool
+    private function updateFileCleanly(ComposerJsonFile $json, array $new, string $requireKey, string $removeKey, bool $sortPackages): bool
     {
         $contents = file_get_contents($json->getPath());
 

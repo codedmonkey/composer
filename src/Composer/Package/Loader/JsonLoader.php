@@ -61,7 +61,7 @@ class JsonLoader implements LoaderInterface
         $package = $this->createObject($config, $class);
 
         foreach (BasePackage::$supportedLinkTypes as $type => $opts) {
-            if (empty($config->getLinks($type))) {
+            if (empty($links = $config->getLinks($type))) {
                 continue;
             }
             $method = 'set'.ucfirst($opts['method']);
@@ -70,7 +70,7 @@ class JsonLoader implements LoaderInterface
                     $package->getName(),
                     $package->getPrettyVersion(),
                     $opts['method'],
-                    $config[$type]
+                    $links
                 )
             );
         }

@@ -66,7 +66,14 @@ class JsonPackage
 
     public function getLinks(string $type): array
     {
-        return [];
+        return match ($type) {
+            'require' => $this->require,
+            'require-dev' => $this->requireDev,
+            'conflict' => $this->conflict,
+            'provide' => $this->provide,
+            'replace' => $this->replace,
+            'suggest' => $this->suggest,
+        };
     }
 
     public static function transformStringToArray(array|string $bin): array

@@ -98,7 +98,7 @@ class ComposerJsonFile
      * @throws \RuntimeException
      * @return mixed
      */
-    public function read()
+    public function read(): JsonPackage
     {
         try {
             if ($this->httpDownloader) {
@@ -115,8 +115,6 @@ class ComposerJsonFile
                     }
                     $this->io->writeError('Reading ' . $this->path . $realpathInfo);
                 }
-                var_dump('1');
-                var_dump($this->path);
 
                 $json = file_get_contents($this->path);
             }
@@ -344,29 +342,12 @@ class ComposerJsonFile
      * @throws ParsingException
      * @return mixed
      */
-    public static function parseJson(?string $json, ?string $file = null)
+    public static function parseJson(?string $json, ?string $file = null): JsonPackage
     {
-        var_dump($json);
-
         $streamer = JsonStreamReader::create();
         $package = $streamer->read($json, Type::object(JsonPackage::class));
-        var_dump('2');
-        var_dump($package);
 
         return $package;
-
-        if (null === $json) {
-            return null;
-        }
-        $data = json_decode($json, true);
-        if (null === $data && JSON_ERROR_NONE !== json_last_error()) {
-            self::validateSyntax($json, $file);
-        }
-
-        var_dump($data);
-        die('👀');
-
-        return $data;
     }
 
     /**
