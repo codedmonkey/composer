@@ -619,7 +619,7 @@ class Package extends BasePackage
     /**
      * Sets the notification URL
      */
-    public function setNotificationUrl(string $notificationUrl): void
+    public function setNotificationUrl(?string $notificationUrl): void
     {
         $this->notificationUrl = $notificationUrl;
     }

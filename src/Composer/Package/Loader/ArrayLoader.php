@@ -46,10 +46,14 @@ class ArrayLoader implements LoaderInterface
     /**
      * @inheritDoc
      */
-    public function load(array $config, string $class = 'Composer\Package\CompletePackage'): BasePackage
+    public function load($config, string $class = 'Composer\Package\CompletePackage'): BasePackage
     {
         if ($class !== 'Composer\Package\CompletePackage' && $class !== 'Composer\Package\RootPackage') {
             trigger_error('The $class arg is deprecated, please reach out to Composer maintainers ASAP if you still need this.', E_USER_DEPRECATED);
+        }
+
+        if (!is_array($config)) {
+            throw new \UnexpectedValueException('Expected package config to be an array, '.gettype($config).' given.');
         }
 
         $package = $this->createObject($config, $class);

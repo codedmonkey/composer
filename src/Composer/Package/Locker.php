@@ -12,6 +12,7 @@
 
 namespace Composer\Package;
 
+use Composer\Json\ComposerJsonFile;
 use Composer\Json\JsonFile;
 use Composer\Installer\InstallationManager;
 use Composer\Pcre\Preg;
@@ -426,7 +427,7 @@ class Locker
      *
      * @param (callable(array<string, mixed>): array<string, mixed>)|null $dataProcessor Receives the lock data and can process it before it gets written to disk
      */
-    public function updateHash(JsonFile $composerJson, ?callable $dataProcessor = null): void
+    public function updateHash(ComposerJsonFile $composerJson, ?callable $dataProcessor = null): void
     {
         $contents = file_get_contents($composerJson->getPath());
         if (false === $contents) {

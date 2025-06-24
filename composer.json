@@ -22,7 +22,7 @@
         }
     ],
     "require": {
-        "php": "^7.2.5 || ^8.0",
+        "php": "^7.4 || ^8.0",
         "composer/ca-bundle": "^1.5",
         "composer/class-map-generator": "^1.4.0",
         "composer/metadata-minifier": "^1.0",
@@ -42,7 +42,8 @@
         "symfony/polyfill-php73": "^1.24",
         "symfony/polyfill-php80": "^1.24",
         "symfony/polyfill-php81": "^1.24",
-        "seld/signal-handler": "^2.0"
+        "seld/signal-handler": "^2.0",
+        "symfony/json-streamer": "^7.3"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^6.4.3 || ^7.0.1",
@@ -55,11 +56,12 @@
     "suggest": {
         "ext-openssl": "Enabling the openssl extension allows you to access https URLs for repositories and packages",
         "ext-zip": "Enabling the zip extension allows you to unzip archives",
-        "ext-zlib": "Allow gzip compression of HTTP requests"
+        "ext-zlib": "Allow gzip compression of HTTP requests",
+        "symfony/json-streamer": "Speed up parsing of metadata"
     },
     "config": {
         "platform": {
-            "php": "7.2.5"
+            "php": "8.2.0"
         },
         "platform-check": false
     },

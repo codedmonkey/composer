@@ -12,11 +12,14 @@
 
 namespace Composer\Package;
 
+use Symfony\Component\JsonStreamer\Attribute\JsonStreamable;
+
 /**
  * Package containing additional metadata that is not used by the solver
  *
  * @author Nils Adermann <naderman@naderman.de>
  */
+#[JsonStreamable]
 class CompletePackage extends Package implements CompletePackageInterface
 {
     /** @var mixed[] */

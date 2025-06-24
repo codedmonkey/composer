@@ -74,13 +74,13 @@ class PluginInstallerTest extends TestCase
 
     protected function setUp(): void
     {
-        $loader = new JsonLoader(new ArrayLoader());
+        $loader = new JsonLoader();
         $this->packages = [];
         $this->directory = self::getUniqueTmpDirectory();
         for ($i = 1; $i <= 8; $i++) {
             $filename = '/Fixtures/plugin-v'.$i.'/composer.json';
             mkdir(dirname($this->directory . $filename), 0777, true);
-            $this->packages[] = $loader->load(__DIR__ . $filename);
+            $this->packages[] = $loader->load(file_get_contents(__DIR__ . $filename));
         }
 
         $dm = $this->getMockBuilder('Composer\Downloader\DownloadManager')
